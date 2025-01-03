@@ -46,10 +46,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+VELERODIR=$(ls -d "velero-${VELERORELEASE}-linux-amd64")
+
 # Make the file executable and move it to /usr/local/bin
-chmod +x ./velero
+chmod +x $VELERODIR/velero
 if [ $? -eq 0 ]; then
-    sudo mv ./velero /usr/local/bin
+    sudo mv $VELERODIR/velero /usr/local/bin
 else
     echo "Failed to make velero executable. Exiting."
     exit 1
