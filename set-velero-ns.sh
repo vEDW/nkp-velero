@@ -24,7 +24,7 @@
 #------------------------------------------------------------------------------
 echo
 echo "Checking current k8s cluster velero namespace"
-VELERONS=$(get po -A |grep velero | awk '{print $1}' |uniq)
+VELERONS=$(kubectl get po -A |grep velero | awk '{print $1}' |uniq)
 if [[ $? -eq 0 ]] || [[ $VELERONS != "" ]]  ; then
     velero client config set namespace=$VELERONS
     velero version
