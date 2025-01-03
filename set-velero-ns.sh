@@ -22,47 +22,13 @@
 # Contributors: 
 
 #------------------------------------------------------------------------------
-VELERORELEASE=$(curl -s https://api.github.com/repos/vmware-tanzu/velero/releases/latest | jq -r .tag_name)
-if [[ ${VELERORELEASE} == "null" ]]; then
-    echo "github api rate limiting blocked request"
-    echo "get latest version failed. Exiting."
-    exit 1
-fi
-
-echo "Downloading velero ${VELERORELEASE}"
-url="https://github.com/vmware-tanzu/velero/releases/download/${VELERORELEASE}/velero-${VELERORELEASE}-linux-amd64.tar.gz"
-
-# Download the file with wget and check for errors
-wget -O velero_Linux_amd64.tar.gz "$url"
-if [ $? -ne 0 ]; then
-    echo "Download failed. Exiting."
-    exit 1
-fi
-
-# Extract the downloaded file and check for errors
-tar xzf velero_Linux_amd64.tar.gz 
-if [ $? -ne 0 ]; then
-    echo "Extraction failed. Exiting."
-    exit 1
-fi
-
-VELERODIR=$(ls -d "velero-${VELERORELEASE}-linux-amd64")
-
-# Make the file executable and move it to /usr/local/bin
-chmod +x $VELERODIR/velero
-if [ $? -eq 0 ]; then
-    sudo mv $VELERODIR/velero /usr/local/bin
+echo
+echo "Checking current k8s cluster velero namespace"
+VELERONS=$(get po -A |grep velero | awk '{print $1}' |uniq)
+if [[ $? -eq 0 ]] || [[ $VELERONS != "" ]]  ; then
+    velero client config set namespace=$VELERONS
+    velero version
 else
-    echo "Failed to make velero executable. Exiting."
+    echo "no velero pod found in current kube context. Exiting."
     exit 1
 fi
-
-# Clean up downloaded files
-rm -f velero_Linux_amd64.tar.gz  $VELERODIR
-
-# Success message
-echo "velero CLI ${VELERORELEASE} installed successfully!"
-echo "checking version"
-velero version
-
-./set-velero-ns.sh
