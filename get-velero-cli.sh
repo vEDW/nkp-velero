@@ -58,9 +58,12 @@ else
 fi
 
 # Clean up downloaded files
-rm -f velero_Linux_amd64.tar.gz 
+rm -f velero_Linux_amd64.tar.gz  $VELERODIR
 
 # Success message
 echo "velero CLI ${VELERORELEASE} installed successfully!"
 echo "checking version"
-velero version
+velero version -n kommander
+
+echo "setting default velero namespace to kommander"
+velero client config set namespace=kommander
